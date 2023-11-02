@@ -7,7 +7,7 @@ on:
         branches: [ main ]
 
 jobs:
-  func-build:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: checkout
@@ -17,8 +17,6 @@ jobs:
         id: define-vars
         run: |
           echo "github-sha-short=$(echo $GITHUB_SHA | cut -c 1-7)" >> $GITHUB_OUTPUT
-#          echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
-#          echo "::set-output name=sha_full::$(git rev-parse HEAD)"
 
       - name: pull template
         uses: docker://ghcr.io/openfaas/faas-cli:latest-root
@@ -51,8 +49,15 @@ jobs:
           username: ${{ vars.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: set up docker buildx
+      - name: "🔧 setup buildx" 
         uses: docker/setup-buildx-action@v3
+
+      - name: "🔧 docker meta"
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ github.repository }}
+          tags: latest
 
       - name: build and push the openfaas function
         uses: docker/build-push-action@v5
@@ -60,9 +65,10 @@ jobs:
           context: ./build/faas-test
           file: ./build/faas-test/Dockerfile
           push: true
-          tags: ${{ vars.DOCKER_USERNAME }}/faas-test:latest-${{ steps.define-vars.outputs.github-sha-short }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
 
       - name: deploy the function
         uses: docker://ghcr.io/openfaas/faas-cli:latest-root
         with:
-          args: deploy --tag sha  
+          args: deploy
