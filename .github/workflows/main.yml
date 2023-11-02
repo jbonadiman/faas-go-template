@@ -38,10 +38,6 @@ jobs:
           tags: tag:ci
           version: 1.52.0
           
-      - name: test tailscale
-        run: |
-          ping babylon
-      
       - name: login to openfaas gateway
         uses: docker://ghcr.io/openfaas/faas-cli:latest-root
         with:
