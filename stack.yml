@@ -1,0 +1,10 @@
+version: 1.0
+provider:
+  name: openfaas
+  gateway: https://faas.bonadiman.dev
+functions:
+  faas-test:
+    lang: golang-middleware
+    handler: .
+    image: faas-test:latest
+
