@@ -38,11 +38,18 @@ jobs:
           tags: tag:ci
           version: 1.52.0
           
+      - name: test connectivity
+        run: |
+          ping -c 3 babylon
+          ping -c 3 faas.bonadiman.dev
+          curl https://traefik.bonadiman.dev
+          curl https://faas.bonadiman.dev
+
       - name: login to openfaas gateway
         uses: docker://ghcr.io/openfaas/faas-cli:latest-root
         with:
-          args: login -p ${{ secrets.OPENFAAS_GATEWAY_PASSWORD }} \
-                      -g ${{ vars.OPENFAAS_URL }}
+          args: login --password ${{ secrets.OPENFAAS_GATEWAY_PASSWORD }} \
+                      --gateway ${{ vars.OPENFAAS_URL }}
 
       - name: login to docker hub
         if: success()
