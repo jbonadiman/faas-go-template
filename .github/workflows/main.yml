@@ -1,10 +1,13 @@
-name: CI/CD
+name: ci/cd
 
 on:
     push:
         branches: [ main ]
     pull_request:
         branches: [ main ]
+
+env:
+  FAAS_IMAGE: "docker://ghcr.io/openfaas/faas-cli:latest-root"
 
 jobs:
   func-build:
@@ -21,7 +24,7 @@ jobs:
 #          echo "::set-output name=sha_full::$(git rev-parse HEAD)"
 
       - name: pull template
-        uses: docker://openfaas/faas-cli:latest
+        uses: $FAAS_IMAGE
         with:
           args: template store pull golang-middleware
 
@@ -32,12 +35,12 @@ jobs:
           oauth-secret: ${{ secrets.TAILSCALE_OAUTH_SECRET }}
 
       - name: run shrinkwrap build
-        uses: docker://openfaas/faas-cli:latest
+        uses: $FAAS_IMAGE
         with:
           args: build --shrinkwrap
 
       - name: login to openfaas gateway
-        uses: docker://openfaas/faas-cli:latest
+        uses: $FAAS_IMAGE
         with:
           args: login -p ${{ secrets.OPENFAAS_GATEWAY_PASSWORD }} \
                       -g ${{ vars.OPENFAAS_URL }}
@@ -58,9 +61,9 @@ jobs:
           context: ./build/
           file: ./build/Dockerfile
           push: true
-          tags: greenteafox/faas-test:latest-${{ steps.define-vars.outputs.github-sha-short }}
+          tags: ${{ vars.DOCKER_USERNAME }}/faas-test:latest-${{ steps.define-vars.outputs.github-sha-short }}
 
       - name: deploy the function
-        uses: docker://openfaas/faas-cli:latest
+        uses: $FAAS_IMAGE
         with:
           args: deploy --tag sha  
