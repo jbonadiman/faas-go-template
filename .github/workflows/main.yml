@@ -16,7 +16,7 @@ jobs:
       - name: define variables
         id: define-vars
         run: |
-          echo "::set-output name=github-sha-short::$(echo $GITHUB_SHA | cut -c 1-7)"
+          echo "github-sha-short=$(echo $GITHUB_SHA | cut -c 1-7)" >> $GITHUB_OUTPUT
 #          echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
 #          echo "::set-output name=sha_full::$(git rev-parse HEAD)"
 
