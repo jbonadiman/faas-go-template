@@ -25,6 +25,11 @@ jobs:
         with:
           args: template store pull golang-middleware
 
+      - name: run shrinkwrap build
+        uses: docker://ghcr.io/openfaas/faas-cli:latest-root
+        with:
+          args: build --shrinkwrap
+
       - name: connect to tailscale
         uses: tailscale/github-action@v2
         with:
@@ -32,12 +37,11 @@ jobs:
           oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
           tags: tag:ci
           version: 1.52.0
-
-      - name: run shrinkwrap build
-        uses: docker://ghcr.io/openfaas/faas-cli:latest-root
-        with:
-          args: build --shrinkwrap
-
+          
+      - name: test tailscale
+        run: |
+          ping babylon
+      
       - name: login to openfaas gateway
         uses: docker://ghcr.io/openfaas/faas-cli:latest-root
         with:
