@@ -22,6 +22,7 @@ jobs:
           version: 1.52.1
 
       - name: define variables
+        if: success()
         id: define-vars
         run: |
           echo "github-sha-short=$(echo $GITHUB_SHA | cut -c 1-7)" >> $GITHUB_OUTPUT
@@ -37,6 +38,7 @@ jobs:
           args: build --shrinkwrap
 
       - name: login to openfaas gateway
+        if: success()
         uses: docker://ghcr.io/openfaas/faas-cli:latest-root
         with:
           args: login --password ${{ secrets.OPENFAAS_GATEWAY_PASSWORD }} \
