@@ -42,6 +42,7 @@ jobs:
           tags: latest
       
   build:
+    needs: setup
     runs-on: ubuntu-latest
     steps:
       - name: run shrinkwrap build
