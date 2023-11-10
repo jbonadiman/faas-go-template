@@ -52,7 +52,7 @@ jobs:
       - name: login to openfaas gateway
         shell: bash
         run: |
-          export OPENFAAS_URL="http://${{ vars.ZEROTIER_HOST }}:8081"
+          export OPENFAAS_URL="http://${{ vars.ZEROTIER_HOST }}:8080"
           echo "${{ secrets.OPENFAAS_GATEWAY_PASSWORD }}" | faas login -s
 
       - name: login to docker hub
