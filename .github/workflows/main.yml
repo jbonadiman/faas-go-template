@@ -19,7 +19,6 @@ jobs:
           curl -sSL https://cli.openfaas.com | sudo sh
 
       - name: zerotier
-        if: success()
         uses: zerotier/github-action@v1.0.1
         with:
           network_id: ${{ secrets.ZEROTIER_NETWORK_ID }}
@@ -44,17 +43,17 @@ jobs:
 
       - name: pull template
         shell: bash
-        run: faas-cli template store pull golang-middleware
+        run: faas template store pull golang-middleware
 
       - name: run shrinkwrap build
         shell: bash
-        run: faas-cli build --shrinkwrap
+        run: faas build --shrinkwrap
 
       - name: login to openfaas gateway
-        if: success()
         shell: bash
-        run: faas-cli login --password ${{ secrets.OPENFAAS_GATEWAY_PASSWORD }} \
-                            --gateway http://${{ vars.ZEROTIER_HOST }}:8081
+        run: |
+          export OPENFAAS_URL="http://${{ vars.ZEROTIER_HOST }}:8081"
+          echo "${{ secrets.OPENFAAS_GATEWAY_PASSWORD }}" | faas login -s
 
       - name: login to docker hub
         if: success()
@@ -84,4 +83,4 @@ jobs:
 
       - name: deploy the function
         shell: bash
-        run: faas-cli deploy
+        run: faas deploy
