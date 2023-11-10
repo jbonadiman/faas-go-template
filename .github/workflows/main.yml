@@ -13,11 +13,22 @@ jobs:
       - name: checkout
         uses: actions/checkout@v4
 
-      - name: ZeroTier
+      - name: zerotier
         uses: zerotier/github-action@v1.0.1
         with:
           network_id: ${{ secrets.ZEROTIER_NETWORK_ID }}
           auth_token: ${{ secrets.ZEROTIER_CENTRAL_TOKEN }}
+
+      - name: ping host
+        shell: bash
+        run: |
+          count=10
+          while ! ping -c 1 ${{ vars.ZEROTIER_HOST }} ; do
+            echo "waiting..." ;
+            sleep 1 ;
+            let count=count-1
+          done
+          echo "ping success"
 
       - name: define variables
         if: success()
@@ -40,7 +51,7 @@ jobs:
         uses: docker://ghcr.io/openfaas/faas-cli:latest-root
         with:
           args: login --password ${{ secrets.OPENFAAS_GATEWAY_PASSWORD }} \
-                      --gateway ${{ vars.OPENFAAS_URL }}
+                      --gateway http://${{ vars.ZEROTIER_HOST }}:8081
 
       - name: login to docker hub
         if: success()
