@@ -44,7 +44,7 @@ jobs:
 
       - name: pull template
         shell: bash
-        run: faas-cli template pull golang-middleware
+        run: faas-cli template store pull golang-middleware
 
       - name: run shrinkwrap build
         shell: bash
