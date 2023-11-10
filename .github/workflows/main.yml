@@ -13,7 +13,13 @@ jobs:
       - name: checkout
         uses: actions/checkout@v4
 
+      - name: download faas-cli
+        shell: bash
+        run: |
+          curl -sSL https://cli.openfaas.com | sudo sh
+
       - name: zerotier
+        if: success()
         uses: zerotier/github-action@v1.0.1
         with:
           network_id: ${{ secrets.ZEROTIER_NETWORK_ID }}
@@ -37,21 +43,18 @@ jobs:
           echo "github-sha-short=$(echo $GITHUB_SHA | cut -c 1-7)" >> $GITHUB_OUTPUT
 
       - name: pull template
-        uses: docker://ghcr.io/openfaas/faas-cli:latest-root
-        with:
-          args: template store pull golang-middleware
+        shell: bash
+        run: faas-cli template pull golang-middleware
 
       - name: run shrinkwrap build
-        uses: docker://ghcr.io/openfaas/faas-cli:latest-root
-        with:
-          args: build --shrinkwrap
+        shell: bash
+        run: faas-cli build --shrinkwrap
 
       - name: login to openfaas gateway
         if: success()
-        uses: docker://ghcr.io/openfaas/faas-cli:latest-root
-        with:
-          args: login --password ${{ secrets.OPENFAAS_GATEWAY_PASSWORD }} \
-                      --gateway http://${{ vars.ZEROTIER_HOST }}:8081
+        shell: bash
+        run: faas-cli login --password ${{ secrets.OPENFAAS_GATEWAY_PASSWORD }} \
+                            --gateway http://${{ vars.ZEROTIER_HOST }}:8081
 
       - name: login to docker hub
         if: success()
@@ -80,6 +83,5 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
 
       - name: deploy the function
-        uses: docker://ghcr.io/openfaas/faas-cli:latest-root
-        with:
-          args: deploy
+        shell: bash
+        run: faas-cli deploy
