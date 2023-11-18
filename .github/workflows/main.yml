@@ -9,6 +9,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      OPENFAAS_PREFIX: ${{ vars.DOCKER_USERNAME }}
     steps:
       - name: checkout
         uses: actions/checkout@v4
@@ -54,7 +56,6 @@ jobs:
       - name: login to openfaas gateway
         shell: bash
         run: |
-          export OPENFAAS_URL="${{ vars.OPENFAAS_URL }}"
           echo "${{ secrets.OPENFAAS_GATEWAY_PASSWORD }}" | faas login -s
 
       - name: login to docker hub
