@@ -21,7 +21,7 @@ jobs:
         run: |
           curl -sSL https://cli.openfaas.com | sudo sh
 
-      - name: Tailscale
+      - name: connect to tailscale network
         uses: tailscale/github-action@v2
         with:
           oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
