@@ -87,4 +87,4 @@ jobs:
 
       - name: deploy the function
         shell: bash
-        run: faas deploy --image ${{ vars.DOCKER_USERNAME }}/${{github.repository}}:latest
+        run: faas deploy --image ${{github.repository}}:latest
