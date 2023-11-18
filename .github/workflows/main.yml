@@ -13,9 +13,6 @@ jobs:
       OPENFAAS_PREFIX: ${{ vars.DOCKER_USERNAME }}
       OPENFAAS_URL: ${{ vars.OPENFAAS_URL }}
     steps:
-      - name: checkout
-        uses: actions/checkout@v4
-
       - name: setup faas and gateway connection
         uses: ./.github/workflows/setup.yml
 
