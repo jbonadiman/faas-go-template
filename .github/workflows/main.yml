@@ -16,29 +16,8 @@ jobs:
       - name: checkout
         uses: actions/checkout@v4
 
-      - name: download faas-cli
-        shell: bash
-        run: |
-          curl -sSL https://cli.openfaas.com | sudo sh
-
-      - name: connect to tailscale network
-        uses: tailscale/github-action@v2
-        with:
-          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
-          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
-          tags: tag:ci
-          version: 1.52.1
-
-      - name: ping host
-        shell: bash
-        run: |
-          count=10
-          while ! ping -c 1 oracle; do
-            echo "waiting..." ;
-            sleep 1 ;
-            let count=count-1
-          done
-          echo "ping success"
+      - name: setup faas and gateway connection
+        uses: ./.github/workflows/setup.yml
 
       - name: define variables
         if: success()
@@ -53,11 +32,6 @@ jobs:
       - name: run shrinkwrap build
         shell: bash
         run: faas build --shrinkwrap
-
-      - name: login to openfaas gateway
-        shell: bash
-        run: |
-          echo "${{ secrets.OPENFAAS_GATEWAY_PASSWORD }}" | faas login -s
 
       - name: login to docker hub
         if: success()
@@ -85,6 +59,20 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      OPENFAAS_PREFIX: ${{ vars.DOCKER_USERNAME }}
+      OPENFAAS_URL: ${{ vars.OPENFAAS_URL }}
+    steps:
+      - name: setup faas and gateway connection
+        uses: ./.github/workflows/setup.yml
+
       - name: deploy the function
         shell: bash
-        run: faas deploy --image ${{github.repository}}:latest
+        env:
+          REPO: ${{ github.event.repository.name }}
+        run: |
+          faas deploy \
+            --image ${{ vars.DOCKER_USERNAME }}/$REPO:latest \
+            --name $REPO
