@@ -18,17 +18,19 @@ jobs:
         run: |
           curl -sSL https://cli.openfaas.com | sudo sh
 
-      - name: zerotier
-        uses: zerotier/github-action@v1.0.1
+      - name: Tailscale
+        uses: tailscale/github-action@v2
         with:
-          network_id: ${{ secrets.ZEROTIER_NETWORK_ID }}
-          auth_token: ${{ secrets.ZEROTIER_CENTRAL_TOKEN }}
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          tags: tag:ci
+          version: 1.52.0
 
       - name: ping host
         shell: bash
         run: |
           count=10
-          while ! ping -c 1 ${{ vars.ZEROTIER_HOST }} ; do
+          while ! ping -c 1 oracle; do
             echo "waiting..." ;
             sleep 1 ;
             let count=count-1
@@ -52,7 +54,7 @@ jobs:
       - name: login to openfaas gateway
         shell: bash
         run: |
-          export OPENFAAS_URL="http://${{ vars.ZEROTIER_HOST }}:8080"
+          export OPENFAAS_URL="${{ vars.OPENFAAS_URL }}"
           echo "${{ secrets.OPENFAAS_GATEWAY_PASSWORD }}" | faas login -s
 
       - name: login to docker hub
