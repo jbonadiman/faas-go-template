@@ -5,4 +5,3 @@ functions:
   faas-test:
     lang: golang-middleware
     handler: .
-    image: faas-test:latest
