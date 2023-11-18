@@ -11,6 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       OPENFAAS_PREFIX: ${{ vars.DOCKER_USERNAME }}
+      OPENFAAS_URL: ${{ vars.OPENFAAS_URL }}
     steps:
       - name: checkout
         uses: actions/checkout@v4
@@ -26,7 +27,7 @@ jobs:
           oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
           oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
           tags: tag:ci
-          version: 1.52.0
+          version: 1.52.1
 
       - name: ping host
         shell: bash
