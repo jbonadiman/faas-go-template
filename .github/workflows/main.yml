@@ -15,6 +15,7 @@ jobs:
       OPENFAAS_URL: "${{ vars.FAASD_HOST }}:${{ vars.FAASD_PORT }}"
     steps:
       - name: "⚙ get repository name"
+        shell: bash
         env:
           REPOSITORY_FULL_NAME: ${{ github.repository }}
         run: export REPO="${REPOSITORY_FULL_NAME##*/}"
@@ -42,6 +43,7 @@ jobs:
         run: faas build --shrinkwrap
 
       - name: "📦 build image"
+        shell: bash
         run: |
           cd "./build/$REPO"
           docker build --file ./Dockerfile --tag "$REPO" --label "runnumber=${GITHUB_RUN_ID}" "."
