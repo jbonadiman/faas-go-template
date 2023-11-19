@@ -21,20 +21,14 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: ⏬ download faas-cli
-      shell: bash
-      run: curl -sSL https://cli.openfaas.com | sudo sh
-
-    - name: 🔗 connect to tailscale network
-      uses: tailscale/github-action@v2
+    - uses: tailscale/github-action@v2
       with:
         oauth-client-id: ${{ inputs.tailscale_client_id }}
         oauth-secret: ${{ inputs.tailscale_client_secret }}
         tags: tag:ci
         version: 1.52.1
 
-    - name: 🧪 test connection
-      shell: bash
+    - shell: bash
       run: |
         count=10
         while ! ping -c 1 ${{ inputs.faasd_host }}; do
@@ -42,10 +36,12 @@ runs:
           sleep 1 ;
           let count=count-1
         done
-        echo "ping success"
 
-    - name: 🤝 login to faas gateway
-      shell: bash
+    - shell: bash
+      if: success()
       env:
         OPENFAAS_URL: ${{ inputs.faasd_host }}:${{ inputs.faasd_port }}
-      run: echo "${{ inputs.faasd_password }}" | faas login -s
+      run: |
+        curl -sSL https://cli.openfaas.com | sudo sh
+        faas template store pull golang-middleware
+        echo "${{ inputs.faasd_password }}" | faas login -s

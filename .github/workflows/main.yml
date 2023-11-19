@@ -32,10 +32,6 @@ jobs:
         run: |
           echo "github-sha-short=$(echo $GITHUB_SHA | cut -c 1-7)" >> $GITHUB_OUTPUT
 
-      - name: "pull template"
-        shell: bash
-        run: faas template store pull golang-middleware
-
       - name: "run shrinkwrap build"
         shell: bash
         run: faas build --shrinkwrap
