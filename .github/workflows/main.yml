@@ -92,6 +92,6 @@ jobs:
         env:
           REPO: ${{ steps.split.outputs.repo_name }}
         run: |
-          faas deploy --image "${{ vars.DOCKER_USERNAME }}/$REPO:latest" --name "$REPO"
+          faas deploy --image "jbonadiman/faas-test:latest" --name "faas-test"
         
     
