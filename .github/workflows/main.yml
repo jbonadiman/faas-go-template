@@ -67,7 +67,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       OPENFAAS_PREFIX: ${{ vars.DOCKER_USERNAME }}
-      OPENFAAS_URL: "${{ vars.FAASD_HOST }}:${{ vars.FAASD_PORT }}"
+      OPENFAAS_URL: "http://${{ vars.FAASD_HOST }}:${{ vars.FAASD_PORT }}"
     steps:
       - name: checkout
         uses: actions/checkout@v4
