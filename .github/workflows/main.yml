@@ -32,10 +32,6 @@ jobs:
         run: |
           echo "github-sha-short=$(echo $GITHUB_SHA | cut -c 1-7)" >> $GITHUB_OUTPUT
 
-      - name: "pull template"
-        shell: bash
-        run: faas template store pull golang-middleware
-
       - name: "run shrinkwrap build"
         shell: bash
         run: faas build --shrinkwrap
@@ -67,6 +63,7 @@ jobs:
 
   deploy:
     name: "🚀 deploy"
+    needs: build
     runs-on: ubuntu-latest
     env:
       OPENFAAS_PREFIX: ${{ vars.DOCKER_USERNAME }}
@@ -89,8 +86,6 @@ jobs:
         env:
           REPO: ${{ github.event.repository.name }}
         run: |
-          faas deploy \
-            --image ${{ vars.DOCKER_USERNAME }}/$REPO:latest \
-            --name $REPO
+          faas deploy --image ${{ vars.DOCKER_USERNAME }}/$REPO:latest --name $REPO
         
     
