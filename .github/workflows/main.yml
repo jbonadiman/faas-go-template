@@ -72,6 +72,14 @@ jobs:
       - name: checkout
         uses: actions/checkout@v4
 
+      - name: get repository name
+        env:
+          REPOSITORY: ${{ github.repository }}
+        id: split
+        run: echo "::set-output name=repo_name::${REPOSITORY##*/}"
+
+
+
       - name: setup faas and gateway connection
         uses: ./
         with:
@@ -84,8 +92,7 @@ jobs:
       - name: deploy the function
         shell: bash
         run: |
-          export GITHUB_REPOSITORY=${{ github.repository }}
-          export REPO=${GITHUB_REPOSITORY#*/}
+          export REPO=${{ steps.split.outputs.repo_name }}
           faas deploy --image ${{ vars.DOCKER_USERNAME }}/$REPO:latest --name $REPO
         
     
