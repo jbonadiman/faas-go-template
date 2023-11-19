@@ -14,16 +14,15 @@ jobs:
       OPENFAAS_PREFIX: ${{ vars.DOCKER_USERNAME }}
       OPENFAAS_URL: "${{ vars.FAASD_HOST }}:${{ vars.FAASD_PORT }}"
     steps:
-      - name: get repository name
+      - name: "⚙ get repository name"
         env:
-          REPOSITORY: ${{ github.repository }}
-        id: split
-        run: echo "::set-output name=repo_name::${REPOSITORY##*/}"
+          REPOSITORY_FULL_NAME: ${{ github.repository }}
+        run: export REPO="${REPOSITORY_FULL_NAME##*/}"
 
       - name: "checkout"
         uses: actions/checkout@v4
       
-      - name : setup faas and gateway connection
+      - name : "setup faas and gateway connection"
         uses: ./
         with:
           tailscale_client_id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
@@ -42,30 +41,31 @@ jobs:
         shell: bash
         run: faas build --shrinkwrap
 
-      - name: "login to docker hub"
-        if: success()
-        uses: docker/login-action@v3
-        with:
-          username: ${{ vars.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-
       - name: "🔧 setup buildx" 
         uses: docker/setup-buildx-action@v3
 
-      - name: "🔧 docker meta"
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ vars.DOCKER_USERNAME }}/${{ steps.split.outputs.repo_name }}
-          tags: latest
+      - name: "📦 build image"
+        run: |
+          cd ./build/$REPO
+          docker build . --file Dockerfile --tag $REPO --label "runnumber=${GITHUB_RUN_ID}"
 
-      - name: "build and push the openfaas function"
-        uses: docker/build-push-action@v5
-        with:
-          context: ./build/${{ steps.split.outputs.repo_name }}
-          file: ./build/${{ steps.split.outputs.repo_name }}/Dockerfile
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
+      - name: "🤝 log in to registry"
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
+
+      - name: "⏫ push image"
+        run: |
+          IMAGE_ID=ghcr.io/${{ github.repository_owner }}/$REPO
+          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+
+          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+
+          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+
+          [ "$VERSION" == "main" ] && VERSION=latest
+          echo IMAGE_ID=$IMAGE_ID
+          echo VERSION=$VERSION
+          docker tag $REPO $IMAGE_ID:$VERSION
+          docker push $IMAGE_ID:$VERSION
 
   deploy:
     name: "🚀 deploy"
@@ -79,9 +79,8 @@ jobs:
 
       - name: get repository name
         env:
-          REPOSITORY: ${{ github.repository }}
-        id: split
-        run: echo "::set-output name=repo_name::${REPOSITORY##*/}"
+          REPOSITORY_FULL_NAME: ${{ github.repository }}
+        run: export REPO="${REPOSITORY_FULL_NAME##*/}"
 
       - name: setup faas and gateway connection
         uses: ./
@@ -92,18 +91,9 @@ jobs:
           faasd_port: ${{ vars.FAASD_PORT }}
           faasd_password: ${{ secrets.FAASD_PASSWORD }}
 
-      - name: "🔧 docker meta"
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ vars.DOCKER_USERNAME }}/${{ steps.split.outputs.repo_name }}
-          tags: latest
-
       - name: deploy the function
         shell: bash
-        env:
-          REPO: ${{ steps.split.outputs.repo_name }}
         run: |
-          faas deploy --image "jbonadiman/faas-test:latest" --name "faas-test"
+          faas deploy --image "ghcr.io/jbonadiman/faas-test:latest" --name "faas-test"
         
     
