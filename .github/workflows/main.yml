@@ -84,6 +84,7 @@ jobs:
       - name: deploy the function
         shell: bash
         run: |
+          export GITHUB_REPOSITORY=${{ github.repository }}
           export REPO=${GITHUB_REPOSITORY#*/}
           faas deploy --image ${{ vars.DOCKER_USERNAME }}/$REPO:latest --name $REPO
         
