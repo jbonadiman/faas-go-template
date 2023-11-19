@@ -43,8 +43,8 @@ jobs:
 
       - name: "📦 build image"
         run: |
-          cd ./build/$REPO
-          docker build --file Dockerfile --tag $REPO --label "runnumber=${GITHUB_RUN_ID}" .
+          cd "./build/$REPO"
+          docker build --file ./Dockerfile --tag "$REPO" --label "runnumber=${GITHUB_RUN_ID}" "."
 
       - name: "🤝 log in to registry"
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
