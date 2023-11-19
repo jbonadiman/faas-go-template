@@ -1,0 +1,58 @@
+name: ⚙ build
+
+on:
+  workflow_call:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      OPENFAAS_PREFIX: ${{ vars.DOCKER_USERNAME }}
+      OPENFAAS_URL: ${{ vars.OPENFAAS_URL }}
+      FAAS_HOST: oracle
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+      
+      - name : setup faas and gateway connection
+        uses: ./.github/workflows/action.yml
+
+      - name: define variables
+        if: success()
+        id: define-vars
+        run: |
+          echo "github-sha-short=$(echo $GITHUB_SHA | cut -c 1-7)" >> $GITHUB_OUTPUT
+
+      - name: pull template
+        shell: bash
+        run: faas template store pull golang-middleware
+
+      - name: run shrinkwrap build
+        shell: bash
+        run: faas build --shrinkwrap
+
+      - name: login to docker hub
+        if: success()
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: "🔧 setup buildx" 
+        uses: docker/setup-buildx-action@v3
+
+      - name: "🔧 docker meta"
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ github.repository }}
+          tags: latest
+
+      - name: build and push the openfaas function
+        uses: docker/build-push-action@v5
+        with:
+          context: ./build/faas-test
+          file: ./build/faas-test/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}

@@ -1,0 +1,35 @@
+name: faasd setup
+runs:
+  using: "composite"
+  env:
+    OPENFAAS_PREFIX: ${{ vars.DOCKER_USERNAME }}
+    OPENFAAS_URL: ${{ vars.OPENFAAS_URL }}
+    FAAS_HOST: oracle
+  steps:
+    - name: ⏬ download faas-cli
+      shell: bash
+      run: |
+        curl -sSL https://cli.openfaas.com | sudo sh
+
+    - name: 🔗 connect to tailscale network
+      uses: tailscale/github-action@v2
+      with:
+        oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+        oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+        tags: tag:ci
+        version: 1.52.1
+
+    - name: 🧪 test connection
+      shell: bash
+      run: |
+        count=10
+        while ! ping -c 1 $FAAS_HOST; do
+          echo "waiting..." ;
+          sleep 1 ;
+          let count=count-1
+        done
+        echo "ping success"
+
+    - name: 🤝 login to faas gateway
+      shell: bash
+      run: echo "${{ secrets.OPENFAAS_GATEWAY_PASSWORD }}" | faas login -s
