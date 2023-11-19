@@ -1,5 +1,23 @@
 name: setup faas and connect to gateway
 description: ""
+
+inputs:
+  tailscale_client_id:
+    description: "tailscale oauth client id"
+    required: true
+  tailscale_client_secret:
+    description: "tailscale oauth client secret"
+    required: true
+  faasd_host:
+    description: "faasd host"
+    required: true
+  faasd_port:
+    description: "faasd port"
+    required: true
+  faasd_password:
+    description: "faasd password"
+    required: true
+
 runs:
   using: "composite"
   steps:
@@ -10,18 +28,16 @@ runs:
     - name: 🔗 connect to tailscale network
       uses: tailscale/github-action@v2
       with:
-        oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
-        oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+        oauth-client-id: ${{ inputs.tailscale_client_id }}
+        oauth-secret: ${{ inputs.tailscale_client_secret }}
         tags: tag:ci
         version: 1.52.1
 
     - name: 🧪 test connection
       shell: bash
-      env:
-        FAASD_HOST: ${{ vars.FAASD_HOST }}
       run: |
         count=10
-        while ! ping -c 1 $FAASD_HOST; do
+        while ! ping -c 1 ${{ inputs.faasd_host }}; do
           echo "waiting..." ;
           sleep 1 ;
           let count=count-1
@@ -31,5 +47,5 @@ runs:
     - name: 🤝 login to faas gateway
       shell: bash
       env:
-        OPENFAAS_URL: ${{ vars.OPENFAAS_URL }}
-      run: echo "${{ secrets.OPENFAAS_GATEWAY_PASSWORD }}" | faas login -s
+        OPENFAAS_URL: ${{ inputs.faasd_host }}:${{ inputs.faasd_port }}
+      run: echo "${{ inputs.faasd_password }}" | faas login -s

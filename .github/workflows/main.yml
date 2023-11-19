@@ -12,13 +12,19 @@ jobs:
     runs-on: ubuntu-latest
     env:
       OPENFAAS_PREFIX: ${{ vars.DOCKER_USERNAME }}
-      OPENFAAS_URL: ${{ vars.OPENFAAS_URL }}
+      OPENFAAS_URL: "${{ vars.FAASD_HOST }}:${{ vars.FAASD_PORT }}"
     steps:
       - name: "checkout"
         uses: actions/checkout@v4
       
       - name : setup faas and gateway connection
         uses: ./
+        with:
+          tailscale_client_id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          tailscale_client_secret: ${{ secrets.TS_OAUTH_SECRET }}
+          faasd_host: ${{ vars.FAASD_HOST }}
+          faasd_port: ${{ vars.FAASD_PORT }}
+          faasd_password: ${{ secrets.FAASD_PASSWORD }}
 
       - name: "define variables"
         if: success()
@@ -64,13 +70,19 @@ jobs:
     runs-on: ubuntu-latest
     env:
       OPENFAAS_PREFIX: ${{ vars.DOCKER_USERNAME }}
-      OPENFAAS_URL: ${{ vars.OPENFAAS_URL }}
+      OPENFAAS_URL: "${{ vars.FAASD_HOST }}:${{ vars.FAASD_PORT }}"
     steps:
       - name: checkout
         uses: actions/checkout@v4
 
       - name: setup faas and gateway connection
         uses: ./
+        with:
+          tailscale_client_id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          tailscale_client_secret: ${{ secrets.TS_OAUTH_SECRET }}
+          faasd_host: ${{ vars.FAASD_HOST }}
+          faasd_port: ${{ vars.FAASD_PORT }}
+          faasd_password: ${{ secrets.FAASD_PASSWORD }}
 
       - name: deploy the function
         shell: bash
