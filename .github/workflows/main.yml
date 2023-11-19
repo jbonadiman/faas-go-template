@@ -74,7 +74,7 @@ jobs:
     env:
       OPENFAAS_URL: "http://${{ vars.FAASD_HOST }}:${{ vars.FAASD_PORT }}"
     steps:
-      - name: checkout
+      - name: checkout # needed for the composite action below
         uses: actions/checkout@v4
 
       - name: get repository name
@@ -91,6 +91,13 @@ jobs:
           faasd_host: ${{ vars.FAASD_HOST }}
           faasd_port: ${{ vars.FAASD_PORT }}
           faasd_password: ${{ secrets.FAASD_PASSWORD }}
+
+      - name: "🔧 docker meta"
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ vars.DOCKER_USERNAME }}/${{ steps.split.outputs.repo_name }}
+          tags: latest
 
       - name: deploy the function
         shell: bash
