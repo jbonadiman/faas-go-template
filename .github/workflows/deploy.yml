@@ -14,7 +14,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: setup faas and gateway connection
-        uses: ./.github/workflows/action.yml
+        uses: ./.github/workflows
 
       - name: deploy the function
         shell: bash
