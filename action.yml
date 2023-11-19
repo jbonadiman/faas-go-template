@@ -1,4 +1,5 @@
-name: faasd setup
+name: setup faas and connect to gateway
+description: ""
 runs:
   using: "composite"
   steps:
@@ -16,9 +17,11 @@ runs:
 
     - name: 🧪 test connection
       shell: bash
+      env:
+        FAASD_HOST: ${{ vars.FAASD_HOST }}
       run: |
         count=10
-        while ! ping -c 1 $FAAS_HOST; do
+        while ! ping -c 1 $FAASD_HOST; do
           echo "waiting..." ;
           sleep 1 ;
           let count=count-1
@@ -27,6 +30,6 @@ runs:
 
     - name: 🤝 login to faas gateway
       shell: bash
-      env: 
+      env:
         OPENFAAS_URL: ${{ vars.OPENFAAS_URL }}
       run: echo "${{ secrets.OPENFAAS_GATEWAY_PASSWORD }}" | faas login -s
