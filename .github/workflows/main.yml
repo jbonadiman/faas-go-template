@@ -14,6 +14,12 @@ jobs:
       OPENFAAS_PREFIX: ${{ vars.DOCKER_USERNAME }}
       OPENFAAS_URL: "${{ vars.FAASD_HOST }}:${{ vars.FAASD_PORT }}"
     steps:
+      - name: get repository name
+        env:
+          REPOSITORY: ${{ github.repository }}
+        id: split
+        run: echo "::set-output name=repo_name::${REPOSITORY##*/}"
+
       - name: "checkout"
         uses: actions/checkout@v4
       
@@ -50,14 +56,14 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ github.repository }}
+          images: ${{ vars.DOCKER_USERNAME }}/${{ steps.split.outputs.repo_name }}
           tags: latest
 
       - name: "build and push the openfaas function"
         uses: docker/build-push-action@v5
         with:
-          context: ./build/faas-test
-          file: ./build/faas-test/Dockerfile
+          context: ./build/${{ steps.split.outputs.repo_name }}
+          file: ./build/${{ steps.split.outputs.repo_name }}/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
 
@@ -66,7 +72,6 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     env:
-      OPENFAAS_PREFIX: ${{ vars.DOCKER_USERNAME }}
       OPENFAAS_URL: "http://${{ vars.FAASD_HOST }}:${{ vars.FAASD_PORT }}"
     steps:
       - name: checkout
