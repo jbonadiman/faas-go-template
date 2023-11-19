@@ -11,9 +11,6 @@ jobs:
       OPENFAAS_URL: ${{ vars.OPENFAAS_URL }}
       FAAS_HOST: oracle
     steps:
-      - name: checkout
-        uses: actions/checkout@v4
-
       - name: ⏬ download faas-cli
         shell: bash
         run: |
