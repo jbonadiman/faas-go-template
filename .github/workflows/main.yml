@@ -92,12 +92,9 @@ jobs:
 
       - name: deploy the function
         shell: bash
+        env:
+          FAAS_DEBUG: 1
         run: |
-          AUTH=$(echo -n "admin:${{ secrets.FAASD_PASSWORD }}" | base64)
-
-          curl --request POST \
-          --url http://${{ vars.FAASD_HOST }}:${{ vars.FAASD_PORT }}/system/functions \
-          --header 'Authorization: Basic $AUTH' \
-          --header 'Content-Type: application/json' \
-          --data '{"service": "faas-test","image": "ghcr.io/jbonadiman/faas-test:latest", "labels": {}, "annotations": {}}'
-          
+          faas deploy --name faas-test --image "ghcr.io/jbonadiman/faas-test:latest" 
+        
+    
