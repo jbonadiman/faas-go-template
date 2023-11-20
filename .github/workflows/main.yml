@@ -54,7 +54,7 @@ jobs:
       - name: "⏫ push image"
         run: |
           IMAGE_ID=ghcr.io/jbonadiman/faas-test
-          IMAGE_ID=$(echo faas-test | tr '[A-Z]' '[a-z]')
+          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
 
           VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
 
