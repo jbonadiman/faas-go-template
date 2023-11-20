@@ -45,16 +45,16 @@ jobs:
       - name: "📦 build image"
         shell: bash
         run: |
-          cd "./build/$REPO"
-          docker build --file ./Dockerfile --tag "$REPO" --label "runnumber=${GITHUB_RUN_ID}" "."
+          cd "./build/faas-test"
+          docker build --file ./Dockerfile --tag "faas-test" --label "runnumber=${GITHUB_RUN_ID}" "."
 
       - name: "🤝 log in to registry"
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
 
       - name: "⏫ push image"
         run: |
-          IMAGE_ID=ghcr.io/${{ github.repository_owner }}/$REPO
-          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+          IMAGE_ID=ghcr.io/jbonadiman/faas-test
+          IMAGE_ID=$(echo faas-test | tr '[A-Z]' '[a-z]')
 
           VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
 
@@ -63,7 +63,7 @@ jobs:
           [ "$VERSION" == "main" ] && VERSION=latest
           echo IMAGE_ID=$IMAGE_ID
           echo VERSION=$VERSION
-          docker tag $REPO $IMAGE_ID:$VERSION
+          docker tag faas-test $IMAGE_ID:$VERSION
           docker push $IMAGE_ID:$VERSION
 
   deploy:
