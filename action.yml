@@ -44,4 +44,5 @@ runs:
       run: |
         curl -sSL https://cli.openfaas.com | sudo sh
         faas template store pull golang-middleware
+        faas template store pull dockerfile
         echo "${{ inputs.faasd_password }}" | faas login -s
