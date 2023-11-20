@@ -93,7 +93,7 @@ jobs:
       - name: deploy the function
         shell: bash
         run: |
-          AUTH=$(echo "admin:${{ secrets.FAASD_PASSWORD }}" | base64)
+          AUTH=$(echo -n "admin:${{ secrets.FAASD_PASSWORD }}" | base64)
 
           curl --request POST \
           --url http://${{ vars.FAASD_HOST }}:${{ vars.FAASD_PORT }}/system/functions \
