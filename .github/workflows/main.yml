@@ -93,6 +93,6 @@ jobs:
       - name: deploy the function
         shell: bash
         run: |
-          faas deploy --image ghcr.io/jbonadiman/faas-test:latest --name faas-test --lang dockerfile
+          faas deploy --image 'ghcr.io/jbonadiman/faas-test:latest' --name faas-test --lang dockerfile
         
     
