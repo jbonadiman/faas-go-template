@@ -49,7 +49,7 @@ jobs:
       - name: Publish functions
         run: >
           faas template store pull golang-middleware;
-          OWNER="${{ steps.get_repo_owner.outputs.repo_owner }}"
+          OWNER="${{ env.REPO_OWNER }}"
           TAG="${{ env.TAG }}"
           faas-cli publish
           --extra-tag ${{ github.sha }}
