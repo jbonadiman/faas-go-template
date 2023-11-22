@@ -76,8 +76,8 @@ jobs:
 
       - name: Login
         run: >
-          echo ${{secrets.OPENFAAS_PASSWORD}} |
-          faas-cli login --gateway ${{secrets.OPENFAAS_URL}} --password-stdin
+          echo ${{secrets.FAASD_PASSWORD}} |
+          faas-cli login --gateway ${{env.OPENFAAS_URL}} --password-stdin
 
       - name: Deploy
         run: >
