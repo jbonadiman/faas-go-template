@@ -35,7 +35,7 @@ jobs:
 
       - name: Build functions only
         run: >
+          faas template store pull golang-middleware;
           OWNER="${{ env.REPO_OWNER }}"
           TAG="${{ env.TAG }}"
-          faas template store pull golang-middleware
           faas-cli build
