@@ -1,0 +1,85 @@
+name: publish
+
+on:
+  push:
+    tags:
+      - '*'
+
+permissions:
+  actions: read
+  checks: write
+  contents: read
+  packages: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      OPENFAAS_URL: "${{ vars.FAASD_HOST }}:${{ vars.FAASD_PORT }}"
+      OPENFAAS_PASSWORD: ${{ secrets.FAASD_PASSWORD }}
+    steps:
+      - uses: actions/checkout@master
+        with:
+          fetch-depth: 1
+
+      - name: Get faas-cli
+        run: curl -sLSf https://cli.openfaas.com | sudo sh
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Get TAG
+        id: get_tag
+        run: echo TAG=latest-dev >> $GITHUB_ENV
+
+      - name: Get Repo Owner
+        id: get_repo_owner
+        run: echo "REPO_OWNER=$(echo ${{ github.repository_owner }} | tr '[:upper:]' '[:lower:]')" > $
+
+      - name: Login to Container Registry
+        uses: docker/login-action@v2
+        with:
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          registry: ghcr.io
+
+      - name: Publish functions
+        run: >
+          OWNER="${{ steps.get_repo_owner.outputs.repo_owner }}"
+          TAG="${{ env.TAG }}"
+          faas-cli publish
+          --extra-tag ${{ github.sha }}
+          --extra-tag ${{ env.TAG }}
+          --platforms linux/amd64,linux/arm/v7,linux/arm64
+
+      - name: connecting to tailscale network
+        uses: tailscale/github-action@v2
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          tags: tag:ci
+          version: 1.52.1
+
+      - name: testing connection
+        shell: bash
+        run: |
+          count=10
+          while ! ping -c 1 ${{ vars.FAASD_HOST }}; do
+            echo "waiting..." ;
+            sleep 1 ;
+            let count=count-1
+          done
+
+      - name: Login
+        run: >
+          echo ${{secrets.OPENFAAS_PASSWORD}} |
+          faas-cli login --gateway ${{secrets.OPENFAAS_URL}} --password-stdin
+
+      - name: Deploy
+        run: >
+          OWNER="${{ env.REPO_OWNER }}"
+          TAG="${{ github.sha }}"
+          faas-cli deploy --gateway ${{env.OPENFAAS_URL}}
