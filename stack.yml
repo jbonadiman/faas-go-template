@@ -1,6 +1,7 @@
 version: 1.0
 provider:
   name: openfaas
+  image: ghcr.io/jbonadiman/faas-test:latest
 functions:
   faas-test:
     lang: golang-middleware
