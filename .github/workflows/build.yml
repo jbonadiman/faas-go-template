@@ -31,7 +31,7 @@ jobs:
 
       - name: Get Repo Owner
         id: get_repo_owner
-        run: echo "REPO_OWNER=$(echo ${{ github.repository_owner }} | tr '[:upper:]' '[:lower:]')"
+        run: REPO_OWNER=$(echo ${{ github.repository_owner }} | tr '[:upper:]' '[:lower:]')
 
       - name: Build functions only
         run: >
