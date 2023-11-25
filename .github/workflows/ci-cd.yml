@@ -38,7 +38,7 @@ jobs:
           faas template store pull golang-middleware;
           OWNER="${{ env.REPO_OWNER }}"
           TAG="${{ env.TAG }}"
-          faas-cli build`
+          faas-cli build
 
   deploy:
     runs-on: ubuntu-latest
