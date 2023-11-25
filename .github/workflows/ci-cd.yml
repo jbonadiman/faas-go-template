@@ -112,6 +112,7 @@ jobs:
 
       - name: Deploy
         run: >
+          faas template store pull golang-middleware;
           OWNER="${{ env.REPO_OWNER }}"
           TAG="${{ github.sha }}"
           faas-cli deploy --gateway ${{env.OPENFAAS_URL}}
