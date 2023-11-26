@@ -1,4 +1,4 @@
-name: ci/cd
+name: ci
 
 on:
   pull_request:
@@ -43,10 +43,10 @@ jobs:
           OWNER: ${{ env.REPO_OWNER }}
         run: |
           faas template store pull golang-middleware
-          faas-cli publish
-          --extra-tag ${{ env.TAG }}
-          --extra-tag latest-dev
-          --platforms linux/amd64,linux/arm/v7,linux/arm64
+          faas-cli publish \
+            --extra-tag ${{ env.TAG }} \
+            --extra-tag latest-dev \
+            --platforms linux/amd64,linux/arm/v7,linux/arm64
 
   deploy:
     runs-on: ubuntu-latest
