@@ -1,48 +1,48 @@
 name: ci/cd
 
 on:
-  push:
-    branches:
-      - 'main'
   pull_request:
     branches:
       - 'main'
+  push:
+    branches:
+      - 'develop'
 
 jobs:
   build:
-    name: build and push
+    name: "📦 build and push"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
+      - name: "🔄 checkout"
+        uses: actions/checkout@master
         with:
           fetch-depth: 1
 
-      - name: Get faas-cli
+      - name: "⏬ get faas-cli"
         run: curl -sLSf https://cli.openfaas.com | sudo sh
 
-      - name: Set up QEMU
+      - name: "⚙ set up qemu"
         uses: docker/setup-qemu-action@v2
       
-      - name: Set up Docker Buildx
+      - name: "⚙ set up docker buildx"
         uses: docker/setup-buildx-action@v2
 
-      - name: Get Repo Owner
-        id: get_repo_owner
+      - name: "👤 parse repo owner"
         run: echo "REPO_OWNER=$(echo ${{ github.repository_owner }} | tr '[:upper:]' '[:lower:]')" > $GITHUB_ENV
 
-      - name: Login to Container Registry
+      - name: "🤝 login to container registry"
         uses: docker/login-action@v2
         with:
-          username: ${{ github.repository_owner }}
+          username: ${{ env.REPO_OWNER }}
           password: ${{ secrets.GITHUB_TOKEN }}
           registry: ghcr.io
 
-      - name: Build and publish
+      - name: "🔨 build and publish"
         env:
           TAG: ${{ github.sha }}
           OWNER: ${{ env.REPO_OWNER }}
-        run: >
-          faas template store pull golang-middleware;
+        run: |
+          faas template store pull golang-middleware
           faas-cli publish
           --extra-tag ${{ env.TAG }}
           --extra-tag latest-dev
@@ -50,24 +50,24 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
-    name: deploy
+    name: "🚀 deploy to dev"
     needs: build
     env:
       OPENFAAS_URL: "${{ vars.FAASD_HOST }}:${{ vars.FAASD_PORT }}"
       OPENFAAS_PASSWORD: ${{ secrets.FAASD_PASSWORD }}
     steps:
-      - uses: actions/checkout@master
+      - name: "🔄 checkout"
+        uses: actions/checkout@master
         with:
           fetch-depth: 1
 
-      - name: Get faas-cli
+      - name: "⏬ get faas-cli"
         run: curl -sLSf https://cli.openfaas.com | sudo sh
 
-      - name: Get Repo Owner
-        id: get_repo_owner
+      - name: "👤 parse repo owner"
         run: echo "REPO_OWNER=$(echo ${{ github.repository_owner }} | tr '[:upper:]' '[:lower:]')" > $GITHUB_ENV
 
-      - name: connecting to tailscale network
+      - name: "🔌 ingressing tailscale network"
         uses: tailscale/github-action@v2
         with:
           oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
@@ -75,25 +75,25 @@ jobs:
           tags: tag:ci
           version: 1.52.1
 
-      - name: testing connection
+      - name: "🏓 testing connection"
         shell: bash
         run: |
           count=10
           while ! ping -c 1 ${{ vars.FAASD_HOST }}; do
             echo "waiting..." ;
-            sleep 1 ;
+            sleep 1;
             let count=count-1
           done
 
-      - name: Login
+      - name: "🤝 login to openfaas"
         run: |
           echo ${{secrets.FAASD_PASSWORD}} |
           faas-cli login --gateway ${{env.OPENFAAS_URL}} --password-stdin
 
-      - name: Deploy
+      - name: "🚀 deploy"
         env:
           TAG: ${{ github.sha }}
           OWNER: ${{ env.REPO_OWNER }}
         run: |
-          faas template store pull golang-middleware;
-          faas-cli deploy --gateway ${{env.OPENFAAS_URL}}
+          faas template store pull golang-middleware
+          faas-cli deploy --gateway ${{env.OPENFAAS_URL}} --namespace develop
