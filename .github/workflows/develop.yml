@@ -4,9 +4,6 @@ on:
   pull_request:
     branches:
       - 'main'
-  push:
-    branches:
-      - 'develop'
 
 jobs:
   build:
@@ -73,7 +70,7 @@ jobs:
           oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
           oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
           tags: tag:ci
-          version: 1.52.1
+          version: 1.54.0
 
       - name: "🏓 testing connection"
         shell: bash
