@@ -6,7 +6,6 @@ import (
 	"net/http"
 )
 
-//goland:noinspection GoUnusedExportedFunction
 func Handle(w http.ResponseWriter, r *http.Request) {
 	var input []byte
 
@@ -19,5 +18,5 @@ func Handle(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(fmt.Sprintf("Body: %s", string(input))))
+	w.Write([]byte(fmt.Sprintf("Echo: %s", string(input))))
 }
