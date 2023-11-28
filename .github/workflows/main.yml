@@ -37,6 +37,7 @@ jobs:
         run: |
           docker pull ghcr.io/${{ env.REPO_OWNER }}/${{ env.REPO_NAME }}:latest-dev
           docker tag ghcr.io/${{ env.REPO_OWNER }}/${{ env.REPO_NAME }}:latest-dev ghcr.io/${{ env.REPO_OWNER }}/${{ env.REPO_NAME }}:latest
+          docker tag ghcr.io/${{ env.REPO_OWNER }}/${{ env.REPO_NAME }}:latest-dev ghcr.io/${{ env.REPO_OWNER }}/${{ env.REPO_NAME }}:${{ github.sha}}
           docker push --all-tags ghcr.io/${{ env.REPO_OWNER }}/${{ env.REPO_NAME }}
 
       - name: "🔌 ingressing tailscale network"
