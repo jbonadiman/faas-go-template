@@ -3,7 +3,7 @@ provider:
   name: openfaas
 
 functions:
-  faas-test:
+  faas-go-template:
     lang: golang-middleware
     handler: .
-    image: ghcr.io/${OWNER}/faas-test:${TAG:-latest}
+    image: ghcr.io/${OWNER}/faas-go-template:${TAG:-latest}
